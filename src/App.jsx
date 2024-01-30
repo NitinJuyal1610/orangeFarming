@@ -10,6 +10,7 @@ import Toplist from './components/TopList';
 import Chats from './components/Chats';
 import TopStates from './components/TopStates';
 import NewDeals from './components/NewDeals';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 
 function App() {
   return (
@@ -49,6 +50,8 @@ function App() {
           </div>
         </div>
       </section>
+
+      <SpeedInsights />
     </>
   );
 }
