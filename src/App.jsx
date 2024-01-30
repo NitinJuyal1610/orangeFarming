@@ -18,7 +18,7 @@ function App() {
         <Navbar />
       </NavLayout>
 
-      <section className="overflow-y-scroll w-full h-[100vh]">
+      <section className="overflow-y-scroll w-full p-2 h-[96vh]">
         <div className="grid grid-cols-11  grid-rows-2 gap-4  ">
           <div className="row-span-1 col-span-4 ">
             <Revenues />
