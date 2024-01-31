@@ -1,15 +1,15 @@
 import './App.css';
-import Navbar from './components/Navbar';
-import Revenues from './components/Revenues';
-import Deals from './components/Deals';
+import Navbar from './pages/home/Navbar';
+import Revenues from './pages/home/Revenues';
+import Deals from './pages/home/Deals';
 import NavLayout from './layouts/NavLayout';
-import Quarter from './components/Quarter';
-import Customers from './components/Customers';
-import Graph from './components/Graph';
-import Toplist from './components/TopList';
-import Chats from './components/Chats';
-import TopStates from './components/TopStates';
-import NewDeals from './components/NewDeals';
+import Quarter from './pages/home/Quarter';
+import Customers from './pages/home/Customers';
+import Graph from './pages/home/Graph';
+import Toplist from './pages/home/TopList';
+import Chats from './pages/home/Chats';
+import TopStates from './pages/home/TopStates';
+import NewDeals from './pages/home/NewDeals';
 
 function App() {
   return (
