@@ -7,43 +7,71 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts';
+import { useEffect, useState } from 'react';
+import axios from 'axios';
 
-const data = [
-  {
-    Timestamp: '2022-09-11',
-    Profit_Percentage: 30,
-  },
-  {
-    Timestamp: '2022-09-11',
-    Profit_Percentage: 7,
-  },
-  {
-    Timestamp: '2022-10-11',
-    Profit_Percentage: 8,
-  },
-  {
-    Timestamp: '2022-11-11',
-    Profit_Percentage: 14,
-  },
-  {
-    Timestamp: '2022-12-11',
-    Profit_Percentage: 12,
-  },
-  {
-    Timestamp: '2023-01-12',
-    Profit_Percentage: 35,
-  },
-  {
-    Timestamp: '2022-09-11',
-    Profit_Percentage: 24,
-  },
-];
+// const data = [
+//   {
+//     Timestamp: '2022-09-11',
+//     Profit_Percentage: 30,
+//   },
+//   {
+//     Timestamp: '2022-09-11',
+//     Profit_Percentage: 7,
+//   },
+//   {
+//     Timestamp: '2022-10-11',
+//     Profit_Percentage: 8,
+//   },
+//   {
+//     Timestamp: '2022-11-11',
+//     Profit_Percentage: 14,
+//   },
+//   {
+//     Timestamp: '2022-12-11',
+//     Profit_Percentage: 12,
+//   },
+//   {
+//     Timestamp: '2023-01-12',
+//     Profit_Percentage: 35,
+//   },
+//   {
+//     Timestamp: '2022-09-11',
+//     Profit_Percentage: 24,
+//   },
+// ];
 
-export const Chart = () => {
+export const Chart = ({ year }) => {
+  const [data, setData] = useState([]);
+  const [filtered, setFiltered] = useState([]);
+
+  useEffect(() => {
+    if (year) {
+      const filteredData = data.filter((item) => {
+        return item.Timestamp.substring(0, 4) === year;
+      });
+      setFiltered(filteredData);
+    }
+  });
+  useEffect(() => {
+    (async () => {
+      const response = await axios.get(
+        'https://samplingserver.onrender.com/api/getData',
+      );
+      const data = response.data;
+      data.map((item) => {
+        return {
+          Timestamp: item.Timestamp.substring(0, 10),
+          Profit_Percentage: item.Profit_Percentage,
+        };
+      });
+      setData(data);
+    })();
+  }, []);
   return (
     <ResponsiveContainer width="100%" height="100%">
       <AreaChart
-        data={data}
+        data={filtered.length ? filtered : data}
         margin={{
           top: 10,
           right: 30,
