@@ -21,11 +21,11 @@ app.get('/api/getData', async (req, res) => {
   const jsonArray = response.map((item) => {
     return {
       Timestamp: item['Timestamp'],
-      Profit_Percentage: item['Profit Percentage'],
+      Profit_Percentage: Number(item['Profit Percentage']),
     };
   });
   // apply sampling algorithm
-  const reducedRep = sampling(jsonArray);
+  const reducedRep = sampling(jsonArray, 5, 1.0);
   return res.status(200).json(reducedRep);
 });
 

@@ -1,73 +1,39 @@
-function calculateRepresentativeProfit(sample) {
-  let weightedSum = 0;
-  let totalWeight = 0;
-  for (const point of sample) {
-    const weight =
-      (point.Timestamp - sample[0].Timestamp) /
-      (sample[sample.length - 1].Timestamp - sample[0].Timestamp);
-    weightedSum += weight * point.Profit_Percentage;
-    totalWeight += weight;
-  }
-
-  return weightedSum / totalWeight;
+function calculateVariance(values) {
+  const mean = values.reduce((sum, value) => sum + value, 0) / values.length;
+  const squaredDifferences = values.map((value) => Math.pow(value - mean, 2));
+  const variance =
+    squaredDifferences.reduce((sum, squaredDiff) => sum + squaredDiff, 0) /
+    values.length;
+  return variance;
 }
-export const sampling = (data, maxDataPoints = 100) => {
-  const downsampledData = [];
-  let currentSample = [];
-  let lastTimestamp = null;
 
-  for (const { Timestamp, Profit_Percentage } of data) {
-    // Ensure consistent 15-minute intervals
-    if (lastTimestamp && new Date(Timestamp) - lastTimestamp !== 900000) {
-      throw new Error('Inconsistent timestamp intervals');
-    }
-    lastTimestamp = new Date(Timestamp);
+export const sampling = (data, windowSize, threshold) => {
+  const compressedData = [data[0]]; // Always include the first data point
+  let windowValues = [data[0].Profit_Percentage];
 
-    // Add to current sample
-    currentSample.push({ Timestamp, Profit_Percentage });
+  for (let i = 1; i < data.length; i++) {
+    const currentProfitPercentage = data[i].Profit_Percentage;
 
-    // Check for change or sample size
-    if (
-      currentSample.length >= 4 ||
-      (currentSample.length > 1 &&
-        Math.abs(
-          currentSample[currentSample.length - 1].Profit_Percentage -
-            currentSample[0].Profit_Percentage,
-        ) >= 1)
-    ) {
-      // Determine representative point for the sample
-
-      const representativeTimestamp =
-        currentSample[Math.floor(currentSample.length / 2)].Timestamp;
-      const representativeProfitPercentage =
-        calculateRepresentativeProfit(currentSample);
-
-      downsampledData.push({
-        timestamp: representativeTimestamp,
-        profitPercentage: representativeProfitPercentage,
-      });
-
-      // Reset sample
-      currentSample = [];
+    // Maintain a moving window of profit percentage values
+    windowValues.push(currentProfitPercentage);
+    if (windowValues.length > windowSize) {
+      windowValues.shift(); // Remove the oldest value to keep the window size constant
     }
 
-    // Limit downsampled data size
-    if (downsampledData.length >= maxDataPoints) {
-      break;
+    // Calculate the variance of the values in the window
+    const windowVariance = calculateVariance(windowValues);
+
+    // Check if the variance exceeds the threshold
+    if (windowVariance > threshold) {
+      compressedData.push(data[i]);
+      windowValues = [currentProfitPercentage]; // Start a new window with the current value
     }
   }
 
-  // Add any remaining points
-  if (currentSample.length > 0) {
-    const representativeTimestamp =
-      currentSample[currentSample.length / 2].timestamp;
-    const representativeProfitPercentage =
-      calculateRepresentativeProfit(currentSample);
-    downsampledData.push({
-      timestamp: representativeTimestamp,
-      profitPercentage: representativeProfitPercentage,
-    });
-  }
-
-  return downsampledData;
+  return compressedData.map((item) => {
+    return {
+      Timestamp: item.Timestamp.substring(0, 7),
+      Profit_Percentage: item.Profit_Percentage,
+    };
+  });
 };
