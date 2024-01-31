@@ -1,26 +1,32 @@
-import express from 'express';
+import express, { json } from 'express';
 
 import path from 'path';
 import process from 'process';
+import cors from 'cors';
 
 import csv from 'csvtojson';
 import { sampling } from './utils/sampling_algo.js';
+
 const app = express();
 
+app.use(cors());
 app.get('/', (req, res) => {
   return res.json({ message: 'Server is up!' });
 });
 
-app.get('/getData', async (req, res) => {
+app.get('/api/getData', async (req, res) => {
   const csvFilePath = path.join(process.cwd(), 'dataset.csv');
-  const jsonArray = await csv().fromFile(csvFilePath);
+  const response = await csv().fromFile(csvFilePath);
 
-  // apply sampling algorithm
-
-  const reducedRep = sampling(jsonArray);
-  return res.status(200).json({
-    data: reducedRep,
+  const jsonArray = response.map((item) => {
+    return {
+      Timestamp: item['Timestamp'],
+      Profit_Percentage: item['Profit Percentage'],
+    };
   });
+  // apply sampling algorithm
+  const reducedRep = sampling(jsonArray);
+  return res.status(200).json(reducedRep);
 });
 
 app.listen(3000, () => {
